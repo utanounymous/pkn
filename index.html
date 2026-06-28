@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis PKN · MKWN4109</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F0E6CC;
+    --paper:#FBF6E8;
+    --paper-edge:#E8DCB8;
+    --ink:#352A1E;
+    --ink-soft:#6b5d48;
+    --gold:#8B6914;
+    --gold-soft:#C9A646;
+    --seal:#9C2B20;
+    --seal-soft:#c75c4f;
+    --forest:#3F6B4A;
+    --forest-soft:#6f9c79;
+    --shadow: 0 1px 0 rgba(53,42,30,.05), 0 18px 40px -20px rgba(53,42,30,.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top, rgba(139,105,20,.08), transparent 60%),
+      var(--cream);
+    color:var(--ink);
+    font-family:'Lora', serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 16px 60px;
+  }
+  .wrap{width:100%;max-width:660px;}
+
+  /* ---------- header ---------- */
+  .masthead{
+    text-align:center;
+    margin-bottom:22px;
+  }
+  .eyebrow{
+    font-family:'Lora',serif;
+    font-size:11.5px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:600;
+  }
+  .masthead h1{
+    font-family:'Playfair Display', serif;
+    font-weight:800;
+    font-size:30px;
+    margin:6px 0 4px;
+    letter-spacing:-.01em;
+  }
+  .masthead .sub{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+
+  /* ---------- status bar ---------- */
+  .statusbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:22px 2px 10px;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .statusbar b{color:var(--ink);font-weight:600;}
+  .track{
+    position:relative;
+    height:6px;
+    border-radius:6px;
+    background:var(--paper-edge);
+    overflow:hidden;
+    margin:0 2px 18px;
+  }
+  .track-fill{
+    position:absolute;left:0;top:0;bottom:0;
+    background:linear-gradient(90deg, var(--gold-soft), var(--gold));
+    border-radius:6px;
+    transition:width .35s ease;
+  }
+
+  /* ---------- card ---------- */
+  .card{
+    position:relative;
+    background:var(--paper);
+    border:1px solid var(--paper-edge);
+    border-radius:4px;
+    box-shadow:var(--shadow);
+    padding:34px 32px 28px;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute; inset:10px;
+    border:1px solid rgba(139,105,20,.18);
+    pointer-events:none;
+  }
+  .qnum-row{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .qnum{
+    font-family:'Playfair Display', serif;
+    font-weight:700;
+    font-style:italic;
+    font-size:15px;
+    color:var(--gold);
+  }
+  .rule{
+    flex:1;
+    height:1px;
+    background:linear-gradient(90deg, var(--gold-soft), transparent);
+  }
+  .qtext{
+    font-size:18px;
+    line-height:1.55;
+    margin:0 0 24px;
+    color:var(--ink);
+  }
+
+  .opts{display:flex;flex-direction:column;gap:10px;}
+  .opt{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    text-align:left;
+    width:100%;
+    background:transparent;
+    border:1px solid var(--paper-edge);
+    border-radius:3px;
+    padding:12px 14px;
+    font-family:'Lora',serif;
+    font-size:15px;
+    line-height:1.5;
+    color:var(--ink);
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, transform .1s ease;
+  }
+  .opt:hover:not(.locked .opt){
+    border-color:var(--gold);
+    background:rgba(139,105,20,.06);
+  }
+  .opt .letter{
+    font-family:'Playfair Display',serif;
+    font-weight:700;
+    font-size:13px;
+    color:var(--gold);
+    border:1px solid var(--gold-soft);
+    width:22px;height:22px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    flex:none;
+    margin-top:1px;
+  }
+  .opts.locked .opt{cursor:default;}
+  .opts.locked .opt:hover{transform:none;}
+
+  .opt.correct{
+    border-color:var(--forest);
+    background:rgba(63,107,74,.10);
+  }
+  .opt.correct .letter{
+    background:var(--forest);
+    border-color:var(--forest);
+    color:#fff;
+  }
+  .opt.wrong{
+    border-color:var(--seal);
+    background:rgba(156,43,32,.08);
+  }
+  .opt.wrong .letter{
+    background:var(--seal);
+    border-color:var(--seal);
+    color:#fff;
+  }
+  .opt.dim{opacity:.55;}
+
+  /* stamp */
+  .stamp{
+    position:absolute;
+    top:26px; right:26px;
+    font-family:'Playfair Display', serif;
+    font-weight:800;
+    font-size:15px;
+    letter-spacing:.12em;
+    padding:7px 14px 6px;
+    border:3px solid var(--forest);
+    color:var(--forest);
+    border-radius:6px;
+    transform:rotate(-9deg) scale(0);
+    opacity:0;
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .25s ease;
+    pointer-events:none;
+    background:rgba(63,107,74,.04);
+  }
+  .stamp.show{transform:rotate(-9deg) scale(1); opacity:.92;}
+  .stamp.wrong{border-color:var(--seal); color:var(--seal); background:rgba(156,43,32,.04);}
+
+  .explain{
+    margin-top:20px;
+    padding-top:16px;
+    border-top:1px dashed var(--paper-edge);
+    font-size:14px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    max-height:0;
+    opacity:0;
+    overflow:hidden;
+    transition:max-height .35s ease, opacity .35s ease, margin-top .35s ease, padding-top .35s ease;
+  }
+  .explain.show{max-height:300px; opacity:1;}
+  .explain b{color:var(--ink);font-weight:600;font-style:italic;}
+
+  /* ---------- nav ---------- */
+  .navbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:18px;
+  }
+  .btn{
+    font-family:'Lora',serif;
+    font-size:13.5px;
+    font-weight:600;
+    letter-spacing:.02em;
+    padding:11px 16px;
+    border-radius:3px;
+    border:1px solid var(--ink);
+    background:transparent;
+    color:var(--ink);
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+  .btn:hover{background:var(--ink); color:var(--paper);}
+  .btn:disabled{opacity:.35; cursor:not-allowed;}
+  .btn:disabled:hover{background:transparent; color:var(--ink);}
+  .btn.primary{
+    background:var(--gold);
+    border-color:var(--gold);
+    color:#fff;
+    flex:1;
+  }
+  .btn.primary:hover{background:#6f5310;}
+  .btn.ghost{
+    border-color:var(--paper-edge);
+    color:var(--ink-soft);
+    font-size:12.5px;
+    padding:11px 14px;
+  }
+  .btn.ghost:hover{background:var(--ink-soft); color:var(--paper); border-color:var(--ink-soft);}
+
+  .jumprow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin-top:14px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .jumprow input{
+    width:54px;
+    text-align:center;
+    font-family:'Lora',serif;
+    font-size:13px;
+    padding:6px 4px;
+    border:1px solid var(--paper-edge);
+    border-radius:3px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .jumprow button{
+    border:1px solid var(--paper-edge);
+    background:transparent;
+    color:var(--ink-soft);
+    border-radius:3px;
+    padding:6px 10px;
+    font-size:12px;
+    cursor:pointer;
+  }
+  .jumprow button:hover{border-color:var(--gold); color:var(--gold);}
+
+  /* ---------- summary ---------- */
+  .summary{
+    background:var(--paper);
+    border:1px solid var(--paper-edge);
+    border-radius:4px;
+    box-shadow:var(--shadow);
+    padding:36px 32px;
+    text-align:center;
+  }
+  .summary .big{
+    font-family:'Playfair Display',serif;
+    font-weight:800;
+    font-size:48px;
+    color:var(--gold);
+    margin:6px 0;
+  }
+  .summary p{color:var(--ink-soft); font-size:14px; line-height:1.6;}
+  .chipwrap{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    justify-content:center;
+    margin:18px 0 6px;
+    max-height:160px;
+    overflow-y:auto;
+    padding:4px;
+  }
+  .chip{
+    border:1px solid var(--seal-soft);
+    color:var(--seal);
+    font-size:12px;
+    font-weight:600;
+    border-radius:20px;
+    padding:5px 11px;
+    cursor:pointer;
+    background:rgba(156,43,32,.05);
+  }
+  .chip:hover{background:var(--seal); color:#fff;}
+  .summary-actions{
+    display:flex;
+    gap:10px;
+    margin-top:22px;
+  }
+  .hidden{display:none !important;}
+
+  footer.note{
+    text-align:center;
+    margin-top:26px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    opacity:.65;
+  }
+
+  @media (max-width:480px){
+    .card{padding:26px 20px 22px;}
+    .masthead h1{font-size:25px;}
+    .qtext{font-size:16.5px;}
+    .stamp{top:18px; right:18px; font-size:12px; padding:5px 10px 4px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="eyebrow">Universitas Terbuka · MKWN4109</div>
+    <h1>Kuis Pendidikan Kewarganegaraan</h1>
+    <div class="sub">150 soal latihan — pilih jawaban untuk melihat hasilnya</div>
+  </div>
+
+  <div id="quizView">
+    <div class="statusbar">
+      <span>Soal <b id="curNum">1</b> / <b id="totalNum">150</b></span>
+      <span>Benar: <b id="scoreNum">0</b> · Dijawab: <b id="answeredNum">0</b></span>
+    </div>
+    <div class="track"><div class="track-fill" id="trackFill" style="width:0%"></div></div>
+
+    <div class="card" id="card">
+      <div class="stamp" id="stamp">BENAR</div>
+      <div class="qnum-row">
+        <span class="qnum" id="qnumLabel">Soal No. 1</span>
+        <span class="rule"></span>
+      </div>
+      <p class="qtext" id="qtext"></p>
+      <div class="opts" id="opts"></div>
+      <div class="explain" id="explain"></div>
+    </div>
+
+    <div class="navbar">
+      <button class="btn" id="prevBtn">‹ Sebelumnya</button>
+      <button class="btn primary" id="nextBtn">Selanjutnya ›</button>
+    </div>
+    <div class="jumprow">
+      <button id="shuffleBtn">🔀 Acak &amp; mulai ulang</button>
+      <span>·</span>
+      <span>lompat ke</span>
+      <input type="number" id="jumpInput" min="1" max="150" placeholder="#">
+      <button id="jumpBtn">Pergi</button>
+    </div>
+  </div>
+
+  <div id="summaryView" class="summary hidden">
+    <div class="eyebrow">Hasil Akhir</div>
+    <div class="big" id="finalScore">0 / 150</div>
+    <p id="finalPct"></p>
+    <p id="reviewLabel" class="hidden">Soal yang masih perlu ditinjau ulang (klik untuk membuka):</p>
+    <div class="chipwrap" id="chipWrap"></div>
+    <div class="summary-actions">
+      <button class="btn ghost" id="reviewWrongBtn">Tinjau yang salah</button>
+      <button class="btn primary" id="restartBtn">Ulangi Kuis</button>
+    </div>
+  </div>
+
+  <footer class="note">Dibuat dari bank soal MKWN4109 yang kamu unggah · jawaban tersembunyi sampai kamu memilih</footer>
+</div>
+
+<script>
+const QUESTIONS = [
+{q:`Demokrasi harus dibarengi dengan tata pemerintahan yang berciri good governance karena ….`,opts:[`good governance lahir dari demokrasi`,`demokrasi lahir dari good governance`,`demokrasi merupakan semangat dari good governance`,`good governance merupakan semangat konsep yang diadopsi dari pembaharuan demokrasi`],correct:3,exp:`Good governance adalah konsep tata kelola pemerintahan yang baik yang diadopsi dan dikembangkan dalam konteks pembaharuan sistem demokrasi untuk mencapai efektivitas, transparansi, dan akuntabilitas.`},
+{q:`Di bawah ini yang bukan merupakan unsur perangkat daerah adalah ....`,opts:[`lembaga kedinasan daerah`,`sekretariat daerah`,`pemerintah desa`,`dewan perwakilan daerah`],correct:2,exp:`Pemerintah desa adalah satuan pemerintahan di bawah kabupaten/kota, bukan merupakan perangkat daerah (seperti sekretariat daerah, dinas, atau DPRD) dalam struktur pemerintahan daerah otonom.`},
+{q:`Pengetahuan tentang segala sesuatu yang berhubungan dengan konstelasi geografis suatu negara dengan memanfaatkan kondisi letak geografis untuk kepentingan penyelenggaraan pemerintahan nasional dan penentuan kebijakan secara ilmiah berdasarkan realita dan cita-cita bangsa, merupakan pengertian geopolitik berdasarkan ….`,opts:[`Frederich Ratzel`,`Rudolf Kjellen`,`Pancasila`,`Hasan Habib`],correct:1,exp:`Rudolf Kjellen adalah ilmuwan politik yang pertama kali memperkenalkan istilah "geopolitik" sebagai studi tentang negara sebagai organisme geografis.`},
+{q:`Bibit gagasan Nusantara sebagai kesatuan politik sudah dimulai sejak ….`,opts:[`28 Oktober 1928`,`20 Mei 1908`,`13 Desember 1957`,`17 Agustus 1945`],correct:1,exp:`Kebangkitan nasional dengan berdirinya Budi Utomo pada 20 Mei 1908 dianggap sebagai awal dari kesadaran kebangsaan Indonesia yang kemudian melahirkan ide kesatuan Nusantara.`},
+{q:`Geostrategi politik luar negeri Indonesia menganut sistem politik bebas aktif yang dilaksanakan berdasarkan hal-hal berikut ini, kecuali ….`,opts:[`membina persahabatan dan kerja sama yang saling menguntungkan antamegara`,`meningkatkan citra positif Indonesia di kancah internasional`,`kepentingan nasional disesuaikan dengan kepentingan perdamaian dunia`,`menentang segala bentuk imperialisme dan kolonialisme`],correct:2,exp:`Politik luar negeri bebas aktif tetap menjunjung tinggi kepentingan nasional, bukan menyesuaikan dengan kepentingan perdamaian dunia sepenuhnya.`},
+{q:`Cara negara melindungi hak dan kewajiban warga negaranya adalah dengan ….`,opts:[`memberikan kebebasan kepada warga negara untuk melakukan keinginannya`,`mengawasi warga negara yang tidak melakukan kewajiban`,`menyusun regulasi yang tidak mengikat tentang perlindungan hak asasi manusia`,`membangun sistem peradilan hak asasi manusia yang bermartabat dan terpercaya`],correct:3,exp:`Negara melindungi hak dan kewajiban warga negara melalui penegakan hukum yang adil dan sistem peradilan yang kredibel.`},
+{q:`Berikut adalah contoh semangat rela berkorban untuk kepentingan bangsa dan negara, kecuali ….`,opts:[`gotong royong`,`kerja mandiri`,`kerja bakti`,`kerja sosial`],correct:1,exp:`Kerja mandiri lebih menekankan pada usaha individu, bukan semangat rela berkorban untuk kepentingan kolektif bangsa dan negara.`},
+{q:`Pengelolaan dan pemanfaatan sumber daya alam harus dimanfaatkan untuk memakmurkan dan mensejahterakan rakyat serta mengurangi ketergantungan dengan negara lain. Hal ini merupakan pengertian dari asas ….`,opts:[`daya saing`,`maksimal`,`lestari`,`manfaat`],correct:3,exp:`Asas manfaat dalam pengelolaan SDA berarti SDA harus digunakan untuk sebesar-besarnya kemakmuran rakyat dan mengurangi ketergantungan luar negeri.`},
+{q:`Geostrategi sangat terkait dengan aspek-aspek kehidupan sosial di bawah ini, kecuali ….`,opts:[`ideologi`,`politik`,`sumber daya alam`,`pertahanan`],correct:0,exp:`Geostrategi lebih fokus pada aspek politik, ekonomi, sosial budaya, pertahanan keamanan, dan sumber daya alam, bukan secara langsung pada ideologi.`},
+{q:`Integrasi nasional penting dan perlu pada suatu negara yang masyarakatnya ….`,opts:[`majemuk`,`seragam`,`individualis`,`sosialis`],correct:0,exp:`Integrasi nasional sangat penting untuk menyatukan masyarakat yang majemuk agar tercipta persatuan dan kesatuan bangsa.`},
+{q:`Negara Indonesia menerapkan wawasan Nusantara sebagai geopolitik yang dipengaruhi oleh wawasan ….`,opts:[`benua`,`bahari`,`dirgantara`,`kombinasi`],correct:3,exp:`Wawasan Nusantara merupakan gabungan (kombinasi) dari wawasan benua, bahari, dan dirgantara, sesuai dengan kondisi geografis Indonesia sebagai negara kepulauan.`},
+{q:`Berikut ini yang bukan merupakan ciri-ciri sistem demokrasi yang dianut Negara Indonesia adalah ….`,opts:[`sistem demokrasi perwakilan`,`mengedepankan musyawarah dalam mengambil keputusan`,`keadilan sosial dengan pemberian subsidi bagi seluruh rakyat Indonesia`,`dijiwai oleh nilai-nilai Pancasila`],correct:2,exp:`Pemberian subsidi bukanlah ciri khusus sistem demokrasi, melainkan kebijakan ekonomi. Ciri demokrasi Indonesia lebih pada prinsip perwakilan, musyawarah, dan nilai Pancasila.`},
+{q:`Berdasarkan Kamus Besar Bahasa Indonesia (KBBI) negara merupakan ….`,opts:[`tanah yang diperjuangkan bersama`,`alat politik yang disusun berdasarkan demokrasi`,`organisasi dalam suatu wilayah yang mempunyai kekuasaan tertinggi yang sah dan ditaati oleh rakyat`,`kesepakatan antara penduduk yang memiliki tujuan yang sama`],correct:2,exp:`Definisi negara menurut KBBI adalah organisasi di suatu wilayah dengan kekuasaan tertinggi yang sah dan ditaati rakyat.`},
+{q:`Berikut yang bukan perwujudan wawasan Nusantara sebagai kesatuan politik yaitu ….`,opts:[`Pancasila berperan sebagai ideologi bangsa dan negara`,`kepulauan Nusantara sebagai satu kesatuan hukum`,`kesatuan dan persatuan bangsa yang terdiri dari beragam suku, agama dan ras`,`kekayaan wilayah Nusantara baik potensial maupun efektif merupakan modal bersama bangsa`],correct:1,exp:`Kesatuan hukum adalah aspek dari kesatuan politik, namun poin yang bukan perwujudan langsung adalah kekayaan wilayah sebagai modal bersama (lebih ke aspek ekonomi).`},
+{q:`Segala upaya untuk mempertahankan Negara Kesatuan Republik Indonesia dengan cara meningkatkan kesadaran berbangsa dan bernegara, menanamkan kecintaan terhadap tanah air, serta berperan aktif dalam memajukan bangsa dan negara, merupakan pengertian dari bela negara secara ….`,opts:[`fisik`,`subjektif`,`nonfisik`,`objektif`],correct:2,exp:`Bela negara nonfisik adalah upaya membela negara melalui peningkatan kesadaran, kecintaan tanah air, dan partisipasi aktif tanpa menggunakan kekuatan fisik.`},
+{q:`Berikut yang bukan rumusan ketahanan nasional yang tercermin dalam dokumen Garis-Garis Besar Haluan Negara (GBHN) tahun 1998 yaitu ….`,opts:[`ketahanan nasional didasari oleh Asta Gatra`,`ketahanan nasional sebagai konsepsi atau doktrin`,`ketahanan mencerminkan keterpaduan antara segala aspek kehidupan nasional bangsa secara utuh dan menyeluruh`,`ketahanan nasional merupakan ketangguhan suatu bangsa untuk dapat menjamin kelangsungan hidup menuju kejayaan bangsa dan negara`],correct:0,exp:`Asta Gatra adalah konsep ketahanan nasional yang terdiri dari 8 aspek, namun rumusan GBHN 1998 lebih menekankan pada konsep ketahanan nasional sebagai doktrin, keterpaduan, dan ketangguhan bangsa.`},
+{q:`Pernyataan Clifford Geertz "Indonesia ibarat anggur tua dalam botol baru" mengandung arti ….`,opts:[`rakyat berbeda tetapi satu`,`masyarakat maju dalam negara baru`,`masyarakat lama dalam negara baru`,`rakyat berbudaya dalam negara baru`],correct:2,exp:`Metafora "anggur tua dalam botol baru" menggambarkan masyarakat dengan budaya dan tradisi yang sudah lama (tua) yang berada dalam wadah negara yang baru dibentuk.`},
+{q:`Kedudukan Presiden dalam sebuah negara yang menganut sistem presidensial adalah kepala ….`,opts:[`negara`,`pemerintahan`,`wilayah`,`negara dan pemerintahan`],correct:3,exp:`Dalam sistem presidensial, Presiden adalah kepala negara dan sekaligus kepala pemerintahan.`},
+{q:`Salah satu pilar utama di dalam pelaksanaan demokrasi tidak langsung adalah pelaksanaan pemilihan yang bebas dan jujur. Arti bebas dalam hal ini adalah ....`,opts:[`pemilihan diselenggarakan oleh lembaga independen`,`setiap warga negara berhak untuk menjadi calon pemimpin`,`waktu pemilihan bebas untuk dipilih oleh warga negara`,`rakyat bebas memiliki calon pemimpin tanpa intervensi dari pemerintah maupun pihak lain`],correct:3,exp:`Bebas dalam pemilihan berarti tidak ada paksaan, tekanan, atau intervensi dari pihak mana pun dalam memilih pemimpin.`},
+{q:`Berikut yang bukan merupakan faktor-faktor yang dapat memudarkan filosofi bangsa Indonesia adalah ….`,opts:[`globalisasi`,`materialisme`,`patriotisme`,`hedonisme`],correct:2,exp:`Patriotisme justru menguatkan filosofi bangsa, sementara globalisasi, materialisme, dan hedonisme dapat memudarkan nilai-nilai luhur bangsa.`},
+{q:`Berikut ini yang bukan menunjukkan arti demokrasi secara etimologis yaitu ….`,opts:[`kekuasaan rakyat`,`rakyat berkuasa`,`rakyat merdeka`,`government of rule by the people`],correct:2,exp:`Secara etimologis, demokrasi berasal dari "demos" (rakyat) dan "kratos" (kekuasaan), yang berarti kekuasaan rakyat. "Rakyat merdeka" bukan definisi etimologis langsung.`},
+{q:`Berikut yang bukan termasuk personal rights yaitu hak kebebasan untuk ….`,opts:[`bergerak, bepergian, atau berpindah-pindah tempat`,`mengeluarkan atau menyatakan pendapat`,`memilih dan aktif di organisasi atau perkumpulan`,`mengadakan perjanjian kontrak`],correct:3,exp:`Hak mengadakan perjanjian kontrak termasuk dalam hak ekonomi/hak perdata, bukan hak pribadi (personal rights) yang meliputi kebebasan fisik, berpendapat, dan berserikat.`},
+{q:`Berdasarkan Pasal 28 ayat (1) UUD NRI Tahun 1945, kebebasan manusia bersifat tidak ….`,opts:[`mutlak`,`tak terbatas`,`luas`,`bebas`],correct:0,exp:`Kebebasan manusia dibatasi oleh hak asasi orang lain, keamanan, ketertiban, dan moralitas, sehingga tidak bersifat mutlak.`},
+{q:`Masa dimana Renaissance dan reformasi spiritual membawa masyarakat eropa untuk berani berpikir sendiri disebut ….`,opts:[`renaissance`,`kegelapan`,`aufklarung`,`peradaban`],correct:2,exp:`Aufklärung (Pencerahan) adalah periode di Eropa yang menekankan pada akal, ilmu pengetahuan, dan kebebasan berpikir.`},
+{q:`Berikut ini adalah wujud cinta tanah air sebagai salah satu pendorong integritas nasional, kecuali ….`,opts:[`menggunakan produk dalam negeri`,`menggunakan pakaian adat`,`mempelajari tari balet`,`mengkonsumsi buah lokal`],correct:2,exp:`Mempelajari tari balet (budaya asing) bukan merupakan wujud cinta tanah air yang secara langsung mendorong integritas nasional.`},
+{q:`Sifat-sifat dan keadaan-keadaan di dalam negara harus sesuai dengan hakikat Tuhan sebagai sebab yang pertama dari segala sesuatu atau causa prima. Pernyataan tersebut adalah salah satu inti dari sila Pancasila ....`,opts:[`Persatuan Indonesia`,`Kemanusiaan Yang Adil dan Beradab`,`Ketuhanan Yang Maha Esa`,`semua jawaban salah`],correct:2,exp:`Konsep causa prima (sebab pertama) berkaitan dengan Ketuhanan sebagai dasar filosofis negara.`},
+{q:`Salah satu nilai dasar dalam Pancasila meyakini bahwa harkat, martabat, dan hak asasi manusia harus dijunjung tinggi dan tidak boleh diganggu. Keyakinan ini merupakan penjabaran dari sila Pancasila yang ….`,opts:[`kelima`,`keempat`,`kedua`,`pertama`],correct:2,exp:`Sila kedua (Kemanusiaan yang Adil dan Beradab) menjunjung tinggi harkat dan martabat manusia serta HAM.`},
+{q:`Berikut contoh tradisi akar kebudayaan Indonesia yang menghormati adanya hak asasi manusia yaitu ….`,opts:[`hak upeti`,`hak pepe`,`bakudang batiung`,`tudung sipulung`],correct:1,exp:`Hak pepe (menjemur diri) di Surakarta adalah bentuk protes damai masyarakat terhadap penguasa, yang menunjukkan penghormatan terhadap hak menyampaikan pendapat.`},
+{q:`Indonesia Raya sebagai lagu kebangsaan pertama kali dinyanyikan pada ….`,opts:[`Kemerdekaan Indonesia tanggal 17 Agustus 1945`,`Sumpah palapa yang dikemukakan Gadjah Mada`,`Kongres Sumpah Pemuda Tahun 1928`,`Persidangan BPUPKI 29 Mei 1945`],correct:2,exp:`Lagu Indonesia Raya pertama kali dikumandangkan oleh Wage Rudolf Supratman pada Kongres Pemuda II, 28 Oktober 1928.`},
+{q:`Berikut ini peristiwa yang tidak mengandung tantangan terhadap pembentukan integrasi nasional di era setelah kemerdekaan adalah ….`,opts:[`peristiwa Konferensi Meja Bundar (KMB)`,`berlakunya Konstitusi Republik Indonesia Serikat (RIS)`,`pembentukan Undang-Undang Dasar Negara Republik Indonesia Tahun 1945`,`masa berakhirnya Orde Baru tahun 1998`],correct:2,exp:`Pembentukan UUD 1945 justru merupakan tonggak persatuan dan integrasi bangsa, bukan tantangan.`},
+{q:`Pancasila sering disebut sebagai way of life, weltanschauung, pandangan dunia, pandangan hidup, pegangan hidup, pedoman hidup, petunjuk hidup. Implikasi dari hal ini adalah ....`,opts:[`pemahaman tentang Pancasila sebagai pandangan hidup bangsa Indonesia berarti nilai-nilainya dipergunakan sebagai petunjuk hidup sehari-hari, seperti sebuah agama`,`semua tingkah laku dan tindak perbuatan setiap manusia Indonesia harus dijiwai dan merupakan pancaran dari nilai-nilai semua sila Pancasila meskipun secara parsial dan terpisah-pisah`,`Pancasila menjadi cita-cita moral bangsa yang memberikan pedoman dan kekuatan rohaniah bagi bangsa untuk berperilaku luhur dalam kehidupan individual saja`,`semua tingkah laku dan tindak perbuatan setiap manusia Indonesia harus dijiwai dan merupakan pancaran dari nilai-nilai semua sila Pancasila`],correct:3,exp:`Sebagai pandangan hidup, Pancasila harus dijiwai dalam seluruh aspek kehidupan berbangsa dan bernegara secara utuh, bukan parsial.`},
+{q:`Berikut ini yang bukan termasuk tiga kelompok etnis di Belgia yang saling berebut pengaruh dan dominasi dalam aspek budaya adalah suku ….`,opts:[`Vlaam`,`Vallon`,`minoritas Belgia berbahasa Jerman`,`Viking`],correct:3,exp:`Viking bukan kelompok etnis di Belgia. Kelompok etnis utama di Belgia adalah Vlaam, Vallon, dan minoritas berbahasa Jerman.`},
+{q:`Rakyat menempati kedudukan yang sentral di dalam negara demokrasi karena hal-hal berikut ini kecuali ….`,opts:[`kebijakan negara dirumuskan oleh rakyat`,`pertimbangan kebijakan negara dilakukan oleh rakyat`,`persoalan negara diciptakan oleh rakyat`,`tujuan kebijakan negara untuk rakyat`],correct:2,exp:`Persoalan negara tidak diciptakan oleh rakyat, melainkan muncul dari kondisi objektif. Rakyat berperan dalam merumuskan dan mengevaluasi kebijakan.`},
+{q:`Berikut yang bukan identitas nasional dalam arti fisik yaitu .…`,opts:[`bendera merah putih`,`lambang negara`,`jati diri psikis bangsa`,`Bahasa Indonesia`],correct:2,exp:`Jati diri psikis bangsa termasuk identitas non-fisik (nilai, karakter), sementara bendera, lambang negara, dan bahasa adalah identitas fisik/simbolik.`},
+{q:`Tujuan dari dibentuknya suatu negara adalah sebagai berikut, kecuali ….`,opts:[`membangun tatanan kehidupan masyarakat agar teratur dan berjalan lebih baik`,`menciptakan kehidupan yang serasi, selaras, dan seimbang antarkebutuhan manusia`,`menciptakan kesatuan di antara orang-orang yang saling merasa setia kawan`,`menjamin hak warga negara, perlindungan keamanan, dan perlakuan yang sama di depan hukum`],correct:2,exp:`Menciptakan kesatuan karena rasa setia kawan lebih merupakan tujuan pembentukan bangsa atau komunitas, bukan tujuan utama negara secara formal.`},
+{q:`Objek formal Pendidikan Kewarganegaraan tampak pada materi yang dikaji, yaitu hal-hal di bawah ini kecuali ….`,opts:[`hak dan kewajiban negara dan warga negara`,`hukum pidana`,`wawasan nusantara`,`ketahanan nasional`],correct:1,exp:`Hukum pidana bukan objek formal Pendidikan Kewarganegaraan, yang fokus pada hubungan warga negara dan negara, wawasan kebangsaan, dan ketahanan nasional.`},
+{q:`Berikut ini yang bukan aspek tri gatra dalam wawasan nusantara adalah …`,opts:[`posisi dan lokasi geografis negara`,`negara kepulauan dengan jumlah 17.508 pulau`,`keadaan dan kekayaan alam`,`komposisi dan kemampuan penduduk`],correct:1,exp:`Tri gatra meliputi aspek geografi, demografi, dan kekayaan alam. Jumlah pulau merupakan fakta geografis, bukan aspek analitis dalam tri gatra.`},
+{q:`Proses kesepakatan atau perjanjian antar individu untuk menjaga dan melindungi kepentingan dirinya dari ancaman dan gangguan disebut ….`,opts:[`pakta sosial`,`sosial amandemen`,`kontak sosial`,`prasati sosial`],correct:0,exp:`Teori perjanjian sosial (social contract) menyatakan bahwa negara terbentuk dari kesepakatan individu untuk melindungi kepentingan bersama.`},
+{q:`Demokrasi di Indonesia merupakan salah satu muatan materi dalam Pendidikan Kewarganegaraan yang pembahasannya meliputi hal-hal di bawah ini, kecuali …`,opts:[`pengertian demokrasi`,`prinsip-prinsip umum demokrasi`,`aspek mekanisme demokrasi Pancasila`,`demokrasi luar negeri`],correct:3,exp:`Pendidikan Kewarganegaraan membahas demokrasi dalam konteks sistem politik Indonesia, bukan demokrasi luar negeri.`},
+{q:`Konstitusi berasal dari bahasa Perancis "constituer", yang berarti ….`,opts:[`peraturan`,`undang-undang`,`keputusan`,`ketetapan`],correct:2,exp:`Constituer (Perancis) berarti "membentuk, menetapkan, memutuskan", yang merujuk pada pembentukan atau keputusan dasar negara.`},
+{q:`Berikut ini yang bukan merupakan fungsi negara adalah ….`,opts:[`menjaga keamanan dan ketertiban`,`menegakkan keadilan`,`mengupayakan kesejahteraan`,`mempersiapkan perang`],correct:3,exp:`Fungsi negara meliputi melindungi, menyejahterakan, dan menegakkan keadilan. Mempersiapkan perang bukan fungsi utama, melainkan bagian dari pertahanan jika diperlukan.`},
+{q:`Landasan utama Pendidikan Pancasila adalah .…`,opts:[`GBHN`,`Instruksi Presiden`,`Pancasila`,`Peraturan Pemerintah`],correct:2,exp:`Pendidikan Pancasila berlandaskan pada nilai-nilai yang terkandung dalam Pancasila itu sendiri sebagai dasar negara.`},
+{q:`Segala hak, wewenang, dan kewajiban daerah otonom untuk mengatur sendiri urusan pemerintahan, kepentingan masyarakat setempat sesuai dengan peraturan yang berlaku di Indonesia dinamakan …`,opts:[`desentralisasi`,`dekonsentrasi`,`tugas pembantuan`,`otonomi daerah`],correct:0,exp:`Otonomi daerah adalah hak dan wewenang daerah untuk mengatur sendiri urusan pemerintahan, yang diwujudkan melalui asas desentralisasi.`},
+{q:`Berikut ini yang merupakan tujuan dari penerapan prinsip-prinsip good governance bagi Indonesia adalah ….`,opts:[`berpegang pada prinsip-prinsip demokrasi`,`menjadi negara yang populer di kancah internasional`,`dapat dengan mudah mendapat pinjaman luar negeri`,`partisipasi masyarakat meningkat dan berkelanjutan`],correct:3,exp:`Salah satu tujuan good governance adalah meningkatkan partisipasi masyarakat dalam pengambilan keputusan publik secara berkelanjutan.`},
+{q:`Organisasi di antara kelompok atau beberapa kelompok manusia yang bersama-sama mendiami suatu wilayah tertentu dengan mengakui adanya suatu pemerintahan yang mengurus tata tertib dan keselamatan sekelompok atau beberapa kelompok manusia tersebut merupakan pengertian dari ….`,opts:[`bangsa`,`negara`,`kesatuan`,`kewarganegaraan`],correct:1,exp:`Definisi tersebut merujuk pada pengertian negara sebagai organisasi kekuasaan di wilayah tertentu yang diakui oleh warganya.`},
+{q:`Pentingnya mempelajari konstitusi suatu negara adalah untuk ….`,opts:[`mengenal cara kerja suatu negara membangun sistem ketatanegaraannya`,`mengetahui adat istiadat yang ada di suatu negara`,`mengetahui rencana pembangunan suatu negara`,`mengenali sistem hukum dari suatu negara yang berdaulat`],correct:0,exp:`Konstitusi mengatur sistem ketatanegaraan, sehingga mempelajarinya membantu memahami cara kerja negara.`},
+{q:`Berikut ini yang bukan termasuk ruang lingkup materi dalam Pendidikan Kewarganegaraan adalah ….`,opts:[`demokrasi Indonesia`,`konsep negara dan konstitusi`,`asal usul Bahasa Indonesia`,`otonomi daerah dan good & clean governance`],correct:2,exp:`Asal usul bahasa bukan bagian dari materi Pendidikan Kewarganegaraan, yang fokus pada kewarganegaraan, demokrasi, negara, dan governance.`},
+{q:`Pendidikan Kewarganegaraan berobjek material nilai, moral, dan budi pekerti. Hal ini merupakan pengertian Pendidikan Kewarganegaraan secara filsafat dilihat dari perspektif ….`,opts:[`epistemologi`,`ontologi`,`metodologi`,`aksiologi`],correct:1,exp:`Ontologi membahas hakikat atau objek material suatu ilmu. Objek material Pendidikan Kewarganegaraan adalah nilai, moral, dan budi pekerti.`},
+{q:`Terdapat kriteria tentang tata kelola pemerintahan yang baik. Salah satunya adalah responsif, yang artinya ….`,opts:[`tata kelola pemerintahan yang baik juga ditentukan oleh seberapa cepat pemerintah tersebut merespon berbagai persoalan yang muncul di masyarakat`,`konsep ini berhubungan langsung dengan kedudukan rakyat sebagai pemilik kedaulatan tertinggi negara`,`tata kelola yang baik harus mampu menjamin transparansi di hampir semua bidang yang terkait dengan pengelolaan informasi`,`negara adalah entitas kolektif yang terdiri atas berbagai macam golongan dan kepentingan`],correct:0,exp:`Responsif dalam good governance berarti kemampuan pemerintah merespons kebutuhan dan masalah masyarakat dengan cepat dan tepat.`},
+{q:`Kedudukan pembukaan UUD 1945 bagi bangsa Indonesia bersifat tetap dan tidak dapat diubah, hal ini dikarenakan ....`,opts:[`pasal-pasal UUD 1945 telah diubah`,`sebagai wujud penghormatan terhadap hasil perjuangan bangsa`,`merupakan kaidah yang fundamental terbentuknya negara`,`telah disepakati oleh MPR RI tidak akan berubah`],correct:2,exp:`Pembukaan UUD 1945 mengandung dasar filosofis negara (Pancasila) dan tujuan negara yang bersifat fundamental dan tidak boleh diubah.`},
+{q:`Konsep good governance adalah konsep yang seharusnya ada di dalam negara yang menganut prinsip ….`,opts:[`reformasi`,`demokrasi`,`otonomi daerah`,`oligarki`],correct:1,exp:`Good governance adalah prinsip tata kelola pemerintahan yang baik yang sejalan dengan nilai-nilai demokrasi seperti partisipasi, transparansi, dan akuntabilitas.`},
+{q:`Otonomi daerah merupakan hak, wewenang, dan kewajiban daerah otonom untuk mengatur dan mengurus sendiri daerahnya. Berikut ini yang merupakan esensi di dalam otonomi daerah adalah ….`,opts:[`wewenang untuk mengatur daerahnya sendiri`,`pemisahan wewenang antara pusat dan daerah`,`pemisahan kekuasaan antara pemerintah pusat dan daerah`,`kebebasan untuk mengatur daerahnya tanpa campur tangan dari pusat`],correct:1,exp:`Esensi otonomi daerah adalah pembagian wewenang antara pemerintah pusat dan daerah, bukan kebebasan mutlak tanpa kendali pusat.`},
+{q:`Geopolitik merupakan sistem politik terkait dengan demopolitik, ekonomi politik, sosiopolitik, dan kratopolitik. Pengertian ini disampaikan oleh ….`,opts:[`Frederich Ratzel`,`Rudolf Kjellen`,`Karl Haushofer`,`Hasan Habib`],correct:1,exp:`Rudolf Kjellen membagi geopolitik menjadi beberapa dimensi: demopolitik, ekonomi politik, sosiopolitik, dan kratopolitik.`},
+{q:`Sejak diratifikasinya UNCLOS setelah adanya Deklarasi Djuanda, wilayah laut NKRI menjadi lebih luas karena dalam deklarasi tersebut dinyatakan bahwa ….`,opts:[`wilayah laut Indonesia menjadi 5,9 juta Km²`,`lebar laut teritorial Indonesia menjadi 12 mil yang dihitung dari garis yang menghubungkan pulau terluar Indonesia`,`Negara Kesatuan Republik Indonesia adalah sebuah negara kepulauan yang berciri nusantara`,`wilayah RI terdiri atas gugusan pulau-pulau dan lautan`],correct:1,exp:`Deklarasi Djuanda menetapkan laut teritorial Indonesia selebar 12 mil dari garis pangkal lurus (archipelagic baseline), yang kemudian diakui dalam UNCLOS.`},
+{q:`Berikut yang bukan merupakan perwujudan geostrategi politik dalam negeri yaitu ….`,opts:[`sistem pemerintahan yang berdasarkan hukum dengan kedaulatan berada di tangan rakyat dan dilaksanakan menurut UUD 1945`,`mekanisme politik demokrasi yang memungkinkan adanya perbedaan pendapat yang beretika dan berdasar pada nilai-nilai dasar Pancasila`,`adanya komunikasi yang agresif antara masyarakat dan pemerintah, serta antarkelompok dan golongan masyarakat demi mencapai tujuan nasional`,`kepemimpinan nasional yang mampu mengakomodasi beragam aspirasi yang hidup di masyarakat dengan tetap berada dalam lingkup pandangan hidup bangsa`],correct:2,exp:`Komunikasi yang agresif bukan merupakan prinsip geostrategi; yang diperlukan adalah komunikasi yang konstruktif, dialogis, dan beradab.`},
+{q:`Demi penghormatan terhadap harkat dan martabat manusia maka hak dan kewajiban harus ….`,opts:[`disamakan`,`diusahakan`,`dihormati`,`diseimbangkan`],correct:3,exp:`Hak dan kewajiban harus seimbang; pemenuhan hak harus diimbangi dengan pelaksanaan kewajiban untuk menjaga harmoni sosial.`},
+{q:`Integrasi nasional merupakan dasar nilai untuk mewujudkan cita-cita bersama dalam kehidupan di suatu negara, hal ini merupakan proses pembentukan Integritas dilihat dari aspek .…`,opts:[`manfaat`,`historis`,`filosofis`,`ekonomi`],correct:2,exp:`Integrasi nasional sebagai dasar nilai untuk mewujudkan cita-cita bersama merupakan tinjauan dari aspek filosofis (nilai-nilai luhur bangsa).`},
+{q:`Berikut yang bukan termasuk usaha pemerintah dalam mengatasi permasalahan distribusi penduduk adalah ….`,opts:[`program transmigrasi`,`membangun pusat-pusat industri`,`pembangunan infrastruktur di kota`,`membangun pusat-pusat pertumbuhan pembangunan`],correct:2,exp:`Pembangunan infrastruktur di kota justru dapat menarik urbanisasi dan memperparah ketimpangan distribusi penduduk.`},
+{q:`Berikut yang bukan merupakan landasan geostrategi dan geopolitik adalah ….`,opts:[`posisi Indonesia yang berada diantara dua benua Asia dan Australia`,`posisi Indonesia yang berada diantara dua samudra, Hindia dan Pasifik`,`demografi Indonesia`,`agama dan aliran kepercayaan di Indonesia`],correct:3,exp:`Landasan geostrategi dan geopolitik lebih pada faktor geografis, demografis, dan sumber daya alam, bukan agama dan kepercayaan.`},
+{q:`Upaya dan proses untuk menyatukan masyarakat ke dalam satu wilayah teritorial sehingga terwujud persatuan dan kesatuan dari berbagai elemen kehidupan masyarakat adalah pengertian integrasi nasional secara ….`,opts:[`yuridis`,`ekonomi`,`politis`,`historis`],correct:2,exp:`Integrasi nasional secara politis adalah proses penyatuan berbagai kelompok masyarakat dalam satu entitas politik (negara).`},
+{q:`Negara yang bisa menguasai Eropa Timur sebagai daerah jantung maka akan bisa menguasai dunia. Kalimat tersebut merupakan pernyataan dari …..`,opts:[`Sir Halford Mackinder dan Karl Haushofer`,`Alfred Thayer Mahan`,`A. Savensky`,`William Billy Mitchell`],correct:0,exp:`Teori "Heartland" yang menyebut Eropa Timur sebagai jantung dunia dikemukakan oleh Sir Halford Mackinder, yang kemudian dikembangkan oleh Karl Haushofer.`},
+{q:`Kata "hikmat" dalam sila keempat Pancasila mengandung arti ….`,opts:[`bersungguh-sungguh`,`berlandasan nilai-nilai keagamaan`,`kearifan`,`bermanfaat`],correct:2,exp:`"Hikmat" dalam sila keempat berarti kebijaksanaan atau kearifan dalam mengambil keputusan melalui musyawarah.`},
+{q:`Negara disebut juga sebagai lembaga sosial karena ….`,opts:[`bekerja tanpa pamrih dengan sukarela`,`berperan dalam melayani masyarakat dalam berbagai bentuk kegiatan`,`tidak mencari keuntungan untuk memperkaya pemegang kekuasaaan negara`,`semua kehidupan bermasyarakat diatur`],correct:3,exp:`Negara sebagai lembaga sosial karena mengatur seluruh aspek kehidupan masyarakat untuk mencapai ketertiban dan kesejahteraan bersama.`},
+{q:`Berikut yang bukan dasar moral bangsa Indonesia yaitu ….`,opts:[`Sila pertama Pancasila`,`Sila kedua Pancasila`,`Alinea/pokok pikiran ketiga pembukaan UUD 1945`,`Alinea/pokok pikiran keempat pembukaan UUD 1945`],correct:2,exp:`Alinea ketiga pembukaan UUD 1945 berisi pernyataan kemerdekaan, sementara dasar moral bangsa terkandung dalam Pancasila dan alinea keempat (tujuan negara).`},
+{q:`Salah satu bentuk keikutsertaan warga negara dalam membela negara sebagaimana amanat dari UU Pertahanan Negara adalah secara sukarela menjadi anggota ….`,opts:[`Aparatur Sipil Negara`,`Tentara Nasional Indonesia`,`Kepolisian Republik Indonesia`,`Pertahanan Sipil (Hansip)`],correct:1,exp:`Menjadi anggota TNI secara sukarela adalah bentuk partisipasi dalam bela negara sesuai UU Pertahanan Negara.`},
+{q:`Ketahanan nasional Indonesia dirumuskan berdasarkan Asta Gatra. Aspek sosial dari Asta Gatra adalah ….`,opts:[`kependudukan`,`kekayaan alam`,`geografi`,`ideologi`],correct:0,exp:`Asta Gatra terdiri dari trigatra (geografi, kekayaan alam, kependudukan) dan pancagatra (ideologi, politik, ekonomi, sosial budaya, pertahanan keamanan). Aspek sosial termasuk dalam pancagatra, namun kependudukan adalah trigatra yang berkaitan dengan aspek sosial demografis.`},
+{q:`Kesadaran tentang pentingnya identitas nasional Indonesia secara historis dimulai sejak ….`,opts:[`Konferensi Meja Bundar`,`Kongres Budi Utomo 1908`,`Ajaran Ki Hajar Dewantoro`,`Surat RA Kartini`],correct:1,exp:`Kebangkitan nasional melalui Budi Utomo (1908) dianggap sebagai awal kesadaran identitas nasional Indonesia.`},
+{q:`Sistem demokrasi yang membebankan tanggung jawab pelaksanaan pemerintahan kepada parlemen disebut demokrasi dengan sistem ….`,opts:[`parlementer`,`presidensial`,`demokrasi`,`kekuasaan`],correct:0,exp:`Dalam sistem parlementer, pemerintahan dipimpin oleh perdana menteri yang bertanggung jawab kepada parlemen.`},
+{q:`Tingkat demokratis suatu negara dapat dinilai berdasarkan hal-hal berikut ini, kecuali …..`,opts:[`pembatasan pemerintah secara institusional`,`kekuasaan mayoritas`,`hak-hak minoritas`,`jaminan hak asasi manusia`],correct:1,exp:`Kekuasaan mayoritas tanpa perlindungan terhadap minoritas dapat menjadi tirani mayoritas, sehingga bukan indikator demokrasi yang baik.`},
+{q:`Salah satu fungsi pentingnya identitas nasional adalah ….`,opts:[`meningkatkan hajat hidup bangsa`,`mencerdaskan kehidupan bangsa`,`antisipasi pengaruh globalisasi`,`memperkuat jati diri bangsa lain`],correct:2,exp:`Identitas nasional berfungsi untuk menjaga kepribadian bangsa dari pengaruh negatif globalisasi, sekaligus mempertahankan nilai-nilai luhur bangsa di tengah arus global.`},
+{q:`Berikut yang bukan pengertian demokrasi menurut Abraham Lincoln adalah pemerintahan ….`,opts:[`karena rakyat`,`dari rakyat`,`oleh rakyat`,`untuk rakyat`],correct:0,exp:`Abraham Lincoln mendefinisikan demokrasi sebagai pemerintahan dari rakyat, oleh rakyat, dan untuk rakyat. "Karena rakyat" bukan bagian dari definisi klasik tersebut.`},
+{q:`Hak asasi manusia menurut Wahidin (2015) dapat dibagi menjadi enam kelompok berikut, kecuali hak asasi ….`,opts:[`pribadi`,`sosial`,`politik`,`ekonomi`],correct:2,exp:`Menurut Wahidin, klasifikasi HAM meliputi hak pribadi, ekonomi, sosial, hukum, politik, dan budaya. Catatan: kunci jawaban pada bank soal asal menandai "hak politik" sebagai jawaban, meskipun secara logis hak politik termasuk kategori HAM — kemungkinan ada inkonsistensi pada soal aslinya.`},
+{q:`Aturan tentang kewajiban warga negara untuk mematuhi dan mentaati segala peraturan perundang-undangan yang tercantum dalam UUD NRI tahun 1945 bersifat ….`,opts:[`komprehensif`,`universal`,`parsial`,`sturuktural`],correct:1,exp:`Kewajiban mematuhi hukum bersifat universal, berlaku untuk semua warga negara tanpa pengecualian.`},
+{q:`Masa ketika pemikiran modern yang meletakkan akal budi atau rasio sebagai instrumen epistemologis yang utama hadir mengakhiri masa kegelapan di Eropa disebut masa ...`,opts:[`Renaissance`,`feodalisme`,`post-modern`,`kejayaan`],correct:1,exp:`Renaissance justru mengakhiri masa kegelapan (feodalisme) dengan penekanan pada akal dan humanisme. Soal aslinya menandai "feodalisme" sebagai jawaban yang dicari (yaitu masa yang diakhiri).`},
+{q:`Berikut ini peran aktif warga negara yang diharapkan dapat membangun integrasi nasional yaitu ….`,opts:[`ikut terlibat dalam aktivitas yang bersifat merugikan orang lain`,`bullying`,`gotong royong`,`ikut organisasi terlarang`],correct:2,exp:`Gotong royong merupakan nilai sosial yang memperkuat persatuan dan integrasi nasional, sementara pilihan lainnya bersifat destruktif.`},
+{q:`Negara Indonesia bukan negara untuk satu orang dan untuk satu golongan, tetapi negara didasarkan atas rakyat, tidak pada golongan, tidak pada perseorangan, berdasarkan permusyawaratan dan gotong royong, berdasarkan kekuasaan yang ada pada rakyat (kedaulatan rakyat). Pernyataan tersebut adalah isi arti dari sila Pancasila sila ...`,opts:[`pertama`,`kelima`,`ketiga`,`keempat`],correct:3,exp:`Pernyataan tersebut mencerminkan prinsip kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan, yaitu sila keempat.`},
+{q:`Aspek nonjasmaniah manusia yang menjadi salah satu kriteria adanya hak asasi sebagai penentu harkat dan martabat manusia adalah ….`,opts:[`akal`,`perasaan`,`kebebasan`,`hati`],correct:0,exp:`Akal (rasio) adalah aspek non-fisik yang membedakan manusia dari makhluk lain dan menjadi dasar pengakuan harkat dan martabatnya.`},
+{q:`Hal-hal yang berhubungan dengan keharusan manusia untuk melakukan sesuatu merupakan pengertian kewajiban secara ....`,opts:[`historis`,`ontologi`,`etimologi`,`aksiologi`],correct:2,exp:`Secara etimologis, kewajiban berasal dari kata "wajib" yang berarti harus atau keharusan.`},
+{q:`Semboyan Bhinneka Tunggal Ika dirumuskan oleh para pendiri bangsa karena kondisi bangsa Indonesia yang ….`,opts:[`homogen`,`heterogen`,`liberal`,`sosialis`],correct:1,exp:`Bhinneka Tunggal Ika artinya "berbeda-beda tetapi tetap satu", dirumuskan karena masyarakat Indonesia yang heterogen (majemuk).`},
+{q:`Integrasi nasional berasal dari situasi dan kondisi masyarakat Indonesia yang ….`,opts:[`individualis`,`sosialisis`,`liberalis`,`majemuk`],correct:3,exp:`Integrasi nasional diperlukan karena masyarakat Indonesia yang majemuk (beragam suku, agama, budaya) memerlukan upaya penyatuan.`},
+{q:`Cita-cita moral bangsa yang memberikan pedoman dan kekuatan rohaniah bagi bangsa untuk berperilaku luhur dalam kehidupan bermasyarakat, berbangsa dan bernegara adalah ….`,opts:[`Pancasila`,`Undang-Undang Dasar Negara Republik Indonesia`,`Tap MPR`,`Peraturan Pemerintah`],correct:0,exp:`Pancasila berfungsi sebagai pandangan hidup dan cita-cita moral bangsa.`},
+{q:`Kasus sentimen etnis dan ketegangan karena persoalan kebudayaan, agama, dan etnis yang mengancam integrasi nasional Negara Yugoslavia dipicu oleh banyaknya suku bangsa yang bermukim di wilayah dan lembah ….`,opts:[`Semenanjung Balkan`,`Semenanjung Sinai`,`Semenanjung Suez`,`Eropa Tengah`],correct:0,exp:`Yugoslavia terletak di kawasan Balkan yang dikenal dengan keragaman etnis dan sejarah konflik.`},
+{q:`Kata 'kerakyatan' di dalam sila keempat Pancasila menunjukkan bahwa negara Indonesia didirikan di atas pemahaman bahwa ….`,opts:[`rakyatlah pemilik kedaulatan negara`,`Indonesia memiliki sistem pemerintahan yang merakyat`,`rakyat indonesia mandiri`,`rakyat adalah pembentuk negara`],correct:0,exp:`Kerakyatan menegaskan bahwa kedaulatan berada di tangan rakyat.`},
+{q:`Berikut ini yang merupakan identitas nasional secara nonfisik adalah …`,opts:[`bahasa Indonesia sebagai bahasa persatuan`,`Garuda Pancasila sebagai lambang negara`,`Pancasila sebagai jati diri bangsa`,`lagu kebangsaan Indonesia Raya`],correct:2,exp:`Identitas nonfisik meliputi nilai, norma, dan pandangan hidup seperti Pancasila, sementara lainnya adalah identitas fisik/simbolik.`},
+{q:`Berikut yang bukan merupakan kebutuhan masyarakat untuk keberlangsungan suatu negara adalah ….`,opts:[`terjaminnya hak masyarakat`,`kondisi ekonomi yang sama rata`,`adanya perlindungan keamanan`,`perlakuan yang sama di depan hukum`],correct:1,exp:`Kebutuhan masyarakat adalah perlindungan hak, keamanan, dan keadilan hukum. Kesamaan ekonomi secara mutlak bukan tujuan negara, melainkan pemerataan kesempatan.`},
+{q:`Objek formal Pendidikan Kewarganegaraan berhubungan dengan ….`,opts:[`dimensi sistem ketatanegaraan yang menekankan pada hubungan antara warga negara dan negara`,`manfaat yang didapat`,`bersifat universal`,`bidang sasaran atau bahan yang dikaji`],correct:0,exp:`Objek formal adalah sudut pandang atau pendekatan ilmu, dalam Pendidikan Kewarganegaraan yaitu hubungan warga negara dan negara dalam konteks ketatanegaraan.`},
+{q:`Menurut ketetapan MPR No VII/MPR/2001, tujuan nasional negara Indonesia yakni ….`,opts:[`melindungi segenap bangsa indonesia dan seluruh tumpah darah Indonesia`,`terwujudnya masyarakat Indonesia yang religius, manusiawi, bersatu, demokratis, adil, sejahtera, maju, mandiri, serta baik dan bersih dalam penyelenggaraan negara`,`melindungi segenap bangsa Indonesia dan seluruh tumpah darah Indonesia`,`mensejahterakan dan mencerdaskan rakyat`],correct:1,exp:`Tujuan nasional menurut Ketetapan MPR tersebut adalah terwujudnya masyarakat Indonesia yang religius, manusiawi, bersatu, demokratis, adil, sejahtera, maju, mandiri, serta baik dan bersih dalam penyelenggaraan negara.`},
+{q:`Raja dianggap sebagai wakil dari Tuhan sehingga apa kata Raja itu identik dengan apa kata Tuhan atau sesuai dengan keinginan Tuhan. Hal ini berhubungan dengan salah satu teori tentang terjadinya negara menurut teori ....`,opts:[`hukum alam`,`ketuhanan`,`perjanjian`,`tata negara`],correct:1,exp:`Teori ketuhanan (teokrasi) menyatakan bahwa kekuasaan raja berasal dari Tuhan dan raja adalah wakil Tuhan di dunia.`},
+{q:`Satu ruang lingkup Pendidikan Kewarganegaraan adalah hak dan kewajiban warga negara yang pembahasannya meliputi hal-hal di bawah ini, kecuali ….`,opts:[`pengertian hak dan kewajiban`,`landasan filosofis hak asasi`,`macam-macam hak warga negara`,`cara menjadi warga negara`],correct:3,exp:`Cara menjadi warga negara lebih terkait dengan hukum kewarganegaraan, bukan fokus utama dalam pembahasan hak dan kewajiban dalam Pendidikan Kewarganegaraan.`},
+{q:`Konstitusi berasal dari bahasa Belanda yaitu grondwet yang artinya ….`,opts:[`tanah basah`,`peraturan`,`hukum dasar`,`pembentukan`],correct:2,exp:`Grondwet dalam bahasa Belanda berarti "hukum dasar" atau undang-undang dasar.`},
+{q:`Berikut yang bukan merupakan cita-cita Negara Indonesia adalah menjadi negara .…`,opts:[`berdaulat`,`boneka`,`merdeka`,`bersatu`],correct:1,exp:`Cita-cita Indonesia adalah berdaulat, merdeka, dan bersatu, bukan boneka (tergantung pada negara lain).`},
+{q:`Pendidikan Kewarganegaraan di perguruan tinggi merupakan sumber nilai dan pedoman dalam pengembangan dan penyelenggaraan program studi serta berguna dalam mengantarkan mahasiswa memantapkan kepribadiannya sebagai manusia seutuhnya, hal ini merupakan … Pendidikan Kewarganegaraan.`,opts:[`visi`,`moto`,`misi`,`amanat`],correct:0,exp:`Pernyataan tersebut menggambarkan visi Pendidikan Kewarganegaraan, yaitu gambaran ideal yang ingin dicapai.`},
+{q:`Alasan yang menyebabkan pembangunan di Indonesia tidak merata sejak zaman kemerdekaan adalah ….`,opts:[`Negara Indonesia sebagai negara kepulauan`,`masyarakat susah untuk diajak kerja sama`,`Belanda telah memecah belah Indonesia`,`adanya campur tangan pihak asing`],correct:0,exp:`Kondisi geografis Indonesia sebagai negara kepulauan menyulitkan pemerataan pembangunan infrastruktur dan akses layanan.`},
+{q:`Berikut ini yang bukan cakupan kegiatan dari istilah governance adalah tata kelola ….`,opts:[`administrasi negara`,`pemerintahan`,`administrasi`,`daerah`],correct:2,exp:`Governance mencakup tata kelola pemerintahan, administrasi negara, dan daerah. "Administrasi" saja terlalu umum dan tidak spesifik sebagai cakupan governance.`},
+{q:`Sekelompok orang yang bersatu berdasarkan satu jiwa atau satu asas spiritual yang tercipta oleh rasa pengorbanan yang telah dibuat pada masa lampau demi masa depan generasi penerusnya merupakan pengertian dari ….`,opts:[`pemerintah yang berdaulat`,`bangsa`,`negara`,`klan`],correct:1,exp:`Definisi tersebut merujuk pada konsep "bangsa" (nation) sebagai komunitas yang memiliki ikatan sejarah, budaya, dan cita-cita bersama.`},
+{q:`Berikut ini yang bukan termasuk di dalam azas umum otonomi daerah adalah ….`,opts:[`desentralisasi`,`dekonsentrasi`,`tugas pembantuan`,`tertib penyelenggaraan negara`],correct:3,exp:`Asas umum penyelenggaraan pemerintahan daerah meliputi desentralisasi, dekonsentrasi, dan tugas pembantuan. "Tertib penyelenggaraan negara" adalah prinsip umum, bukan asas otonomi khusus.`},
+{q:`Berikut ini yang bukan kompetensi yang diharapkan dimiliki oleh mahasiswa setelah mengikuti Pendidikan Kewarganegaraan adalah …`,opts:[`memahami kehidupan berbangsa dan bernegara secara rasional`,`memiliki rasa kebangsaan`,`mencintai tanah air`,`memiliki semangat kemandirian`],correct:3,exp:`Meskipun kemandirian penting, kompetensi utama Pendidikan Kewarganegaraan lebih pada pemahaman kebangsaan, cinta tanah air, dan partisipasi sebagai warga negara.`},
+{q:`Pendidikan kewarganegaraan merupakan bagian ilmu pengetahuan yang memiliki landasan filsafat sebagai berikut, kecuali ….`,opts:[`epistemologi`,`ontologi`,`metodologi`,`aksiologi`],correct:3,exp:`Pendidikan Kewarganegaraan memiliki landasan ontologi, epistemologi, dan metodologi sebagai pijakan filsafat ilmunya; pada soal ini aksiologi ditandai sebagai jawaban yang dicari.`},
+{q:`Terdapat kriteria tentang tata kelola pemerintahan yang baik. Salah satunya adalah transparansi, yang artinya …`,opts:[`tata kelola pemerintahan yang baik juga ditentukan oleh seberapa cepat pemerintah tersebut merespon berbagai persoalan yang muncul di masyarakat`,`salah satu konsep yang penting karena konsep ini berhubungan langsung dengan kedudukan rakyat sebagai pemilik kedaulatan tertinggi negara`,`tata kelola yang baik harus mampu menjamin transparansi di hampir semua bidang yang terkait dengan pengelolaan informasi`,`negara adalah entitas kolektif yang terdiri atas berbagai macam golongan dan kepentingan`],correct:2,exp:`Transparansi dalam good governance berarti keterbukaan informasi publik agar masyarakat dapat mengawasi penyelenggaraan pemerintahan.`},
+{q:`Pada bagian awal suatu konstitusi biasanya berisi tentang ....`,opts:[`asas dan tujuan negara`,`jaminan dan perlindungan hak asasi manusia`,`identitas negara`,`cara melakukan perubahan konstitusi`],correct:1,exp:`Biasanya, setelah pembukaan, pasal-pasal awal konstitusi berisi tentang hak asasi manusia.`},
+{q:`Konsep good governance tidak dapat dipisahkan dengan konsep reformasi secara keseluruhan karena ….`,opts:[`reformasi merupakan semangat dari good governance`,`reformasi merupakan manifestasi semangat dari demokrasi`,`good governance merupakan semangat yang diadopsi dari reformasi`,`reformasi membawa semangat untuk merombak tata pemerintahan lama yang korup`],correct:3,exp:`Reformasi bertujuan memperbaiki sistem pemerintahan yang korup, dan good governance adalah alat untuk mewujudkannya melalui prinsip transparansi, akuntabilitas, dan partisipasi.`},
+{q:`Tata kelola pemerintahan yang baik dan bersih merupakan konsep dari ….`,opts:[`desentralisasi`,`good and clean governance`,`demokrasi`,`dekonsentrasi`],correct:1,exp:`Good and clean governance adalah konsep tata kelola pemerintahan yang baik, bersih, bebas korupsi, dan berorientasi pada pelayanan publik.`},
+{q:`Berikut yang bukan merupakan kekuatan mental dalam politik bangsa Indonesia yaitu kekuatan .…`,opts:[`agama`,`ideologi`,`ilmu pengetahuan`,`jasmani atau fisik dan kekuatan kesejahteraan material`],correct:3,exp:`Kekuatan mental meliputi aspek spiritual, ideologi, dan ilmu pengetahuan. Kekuatan fisik dan material termasuk kekuatan fisik, bukan mental.`},
+{q:`Kekayaan wilayah Nusantara baik potensial maupun efektif adalah modal dan milik bersama bangsa dan keperluan hidup sehari-hari harus tersedia merata di seluruh wilayah tanah air, merupakan makna wawasan Nusantara dilihat sebagai kesatuan …`,opts:[`politik`,`sosial`,`budaya`,`ekonomi`],correct:3,exp:`Pernyataan tersebut menekankan pemerataan kekayaan dan pemenuhan kebutuhan hidup, yang merupakan aspek kesatuan ekonomi.`},
+{q:`Dalam geostrategi, sistem politik Indonesia adalah demokrasi Pancasila yang berciri ….`,opts:[`individualis`,`kompetisi`,`liberal`,`kekeluargaan`],correct:3,exp:`Demokrasi Pancasila bercirikan musyawarah untuk mufakat dan semangat kekeluargaan, berbeda dengan demokrasi liberal yang individualistik.`},
+{q:`Para pendiri negara sepakat bahwa perlindungan hak asasi manusia merupakan hal penting bagi bangsa Indonesia, maka dari itu mereka bersepakat meletakkan asas … bagi kehidupan berbangsa dan bernegara Indonesia.`,opts:[`sosialis`,`liberalis`,`demokrasi`,`kapitalis`],correct:2,exp:`Perlindungan HAM merupakan prinsip dasar dalam negara demokrasi, yang dianut oleh Indonesia.`},
+{q:`Integrasi nasional dapat terbentuk karena ada kesamaan latar belakang sejarah yang dialami suatu bangsa misalnya penderitaan akibat dari penjajahan. Proses pembentukan integrasi yang demikian itu didasarkan pada aspek ….`,opts:[`sosiologis`,`historis`,`filosofis`,`kultural`],correct:1,exp:`Kesamaan pengalaman sejarah (seperti penjajahan) membentuk integrasi nasional berdasarkan aspek historis.`},
+{q:`Berikut yang bukan merupakan kriteria dalam penentuan komposisi penduduk yaitu ….`,opts:[`asal daerah`,`jenis kelamin`,`pendidikan`,`mata pencaharian`],correct:0,exp:`Komposisi penduduk biasanya didasarkan pada usia, jenis kelamin, pendidikan, pekerjaan, dll. Asal daerah lebih terkait distribusi spasial, bukan komposisi demografis murni.`},
+{q:`Salah satu asas dari koperasi yang dianut dalam kehidupan ekonomi Negara Indonesia yang dapat dijadikan bagian dari geostrategi adalah .…`,opts:[`kebersamaan`,`pemerataan`,`kekeluargaan`,`adil dan merata`],correct:2,exp:`Asas kekeluargaan dalam koperasi sesuai dengan nilai Pancasila dan dapat menjadi bagian dari geostrategi ekonomi Indonesia.`},
+{q:`Pengertian integrasi nasional (national integration) berakar dari suatu prinsip-prinsip dasar pemahaman mengenai ….`,opts:[`persatuan karena wilayah yang sama`,`persatuan karena kondisi ekonomi yang sama`,`persatuan diantara perbedaan`,`persatuan karena senasib sepenanggungan`],correct:2,exp:`Integrasi nasional pada dasarnya adalah upaya menyatukan berbagai perbedaan (suku, agama, budaya) dalam satu kesatuan bangsa.`},
+{q:`Berikut yang bukan tata kelengkapan organisasi untuk mencapai tujuan nasional yaitu ….`,opts:[`aparatur negara`,`pemilu`,`media pers`,`partisipasi rakyat`],correct:1,exp:`Pemilu adalah mekanisme politik, bukan kelengkapan organisasi negara. Aparatur negara, media pers, dan partisipasi rakyat adalah komponen pendukung pencapaian tujuan nasional.`},
+{q:`Dalam sila keempat Pancasila klausul "...yang Dipimpin oleh Hikmat Kebijaksanaan dalam Permusyawaratan/Perwakilan", kata Permusyawaratan/Perwakilan mengandung arti ...`,opts:[`demokrasi tak langsung`,`musyawarah dilakukan dalam semua lini kehidupan`,`individu tidak memiliki suara`,`manfaat musyawarah`],correct:0,exp:`Permusyawaratan/perwakilan menunjukkan bahwa demokrasi di Indonesia dilaksanakan secara tidak langsung melalui perwakilan rakyat.`},
+{q:`Berdasarkan Kamus Besar Bahasa Indonesia (KBBI) negara merupakan ….`,opts:[`tanah yang diperjuangkan bersama sehingga merdeka dan berdaulat`,`organisasi yang dibuat untuk memberikan wadah kepada anggotanya untuk mendapatkan pengakuan hukum serta kesejahteraan`,`organisasi dalam suatu wilayah yang mempunyai kekuasaan tertinggi yang sah dan ditaati rakyat`,`kesepakatan antara penduduk yang memiliki tujuan yang sama untuk berserikat secara sah`],correct:2,exp:`Definisi negara menurut KBBI adalah organisasi di wilayah tertentu dengan kekuasaan tertinggi yang sah dan ditaati rakyat.`},
+{q:`Konsep geopolitik Indonesia mengandung unsur wadah yang berwujud ….`,opts:[`cita-cita`,`tata inti organisasi`,`cara kerja`,`sifat dan ciri`],correct:2,exp:`Unsur wadah dalam geopolitik Indonesia (Wawasan Nusantara) adalah cara kerja atau implementasi dari nilai-nilai yang dianut.`},
+{q:`Bela Negara nonfisik menurut Undang-Undang No. 3 Tahun 2002 tentang Pertahanan Negara, keikutsertaan warga negara dalam bela negara secara nonfisik dapat diselenggarakan melalui ….`,opts:[`pendidikan menjadi Tentara Nasional Indonesia`,`pengabdian sesuai dengan profesi`,`menjadi Aparatur Sipil Negara`,`anggota Resimen Mahasiswa (Menwa)`],correct:1,exp:`Bela negara nonfisik dapat dilakukan melalui pengabdian sesuai profesi masing-masing, seperti guru, dokter, dll., untuk membangun bangsa.`},
+{q:`Berikut yang bukan peran lembaga terkait pertahanan Negara Indonesia adalah ….`,opts:[`melindungi negara dari invasi negara lain`,`mempersiapkan komponen cadangan untuk pertahanan negara`,`bekerja sama dengan interpol secara berkelanjutan`,`mewujudkan dan memelihara kestabilan keamanan wilayah`],correct:2,exp:`Kerja sama dengan Interpol (organisasi polisi internasional) lebih terkait penegakan hukum dan kejahatan transnasional, bukan peran utama lembaga pertahanan nasional seperti TNI.`},
+{q:`Identitas nasional menurut Kaelan dan Zubaidi (2007) mengandung 2 hal, yaitu .…`,opts:[`ciri-ciri dan perbedaan dengan bangsa yang lain`,`ciri-ciri dan persamaan dengan bangsa lain`,`sejarah dan perbedaan dengan bangsa lain`,`sejarah dan persamaan dengan bangsa lain`],correct:0,exp:`Identitas nasional adalah ciri khas yang membedakan suatu bangsa dengan bangsa lain.`},
+{q:`Berikut yang bukan ciri-ciri demokrasi sistem parlementer adalah …`,opts:[`kekuasaan legislatif dan eksekutif berbeda`,`kekuasaan legislatif bersifat turun temurun`,`kepala negara seorang ratu/raja/presiden`,`kepala pemerintahan berada pada Perdana Menteri`],correct:1,exp:`Kekuasaan legislatif dalam sistem parlementer diperoleh melalui pemilihan, bukan turun-temurun. Turun-temurun adalah ciri monarki.`},
+{q:`Berikut yang bukan alasan mengapa pemilihan dalam negara demokrasi harus bersifat jujur, yaitu ….`,opts:[`transparansi di dalam semua prosesnya`,`kepercayaan publik terhadap lembaga penyelenggara pemilu`,`kepercayaan calon pemimpin terhadap publik`,`legitimasi kekuasaan yang dipegang oleh pihak pemenang`],correct:2,exp:`Kepercayaan calon terhadap publik bukan alasan utama pemilu jujur. Yang utama adalah transparansi, kepercayaan publik, dan legitimasi hasil pemilu.`},
+{q:`Kongres Sumpah Pemuda Tahun 1928 semakin mempertegas identitas nasional Indonesia. Berikut yang bukan merupakan hasil kongres tersebut adalah ….`,opts:[`bangsa Indonesia mengaku bertanah air yang satu, tanah air Indonesia`,`bangsa Indonesia mengaku berbangsa yang satu, bangsa Indonesia`,`bangsa Indonesia mengaku bernegara yang satu, negara Indonesia`,`bangsa Indonesia menjunjung bahasa persatuan, bahasa Indonesia`],correct:2,exp:`Sumpah Pemuda 1928 menegaskan satu tanah air, satu bangsa, dan satu bahasa. Konsep "satu negara" baru dikemukakan kemudian setelah proklamasi 1945.`},
+{q:`Demokrasi langsung dapat dilakukan pada negara yang ….`,opts:[`luas wilayahnya kecil`,`jumlah warga negaranya sedikit`,`wilayahnya berbentuk kepulauan`,`perbandingan warga negaranya lebih banyak laki-laki`],correct:0,exp:`Demokrasi langsung memungkinkan jika wilayah kecil dan jumlah penduduk terbatas, sehingga rakyat dapat terlibat langsung dalam pengambilan keputusan.`},
+{q:`Berikut yang bukan termasuk legal equity rights yaitu hak ….`,opts:[`kebebasan mengeluarkan atau menyatakan pendapat`,`untuk mendapatkan perlakuan yang sama dalam hukum dan pemerintahan`,`untuk menjadi pegawai negeri sipil`,`mendapatkan layanan dan perlindungan hukum`],correct:0,exp:`Hak kebebasan menyatakan pendapat termasuk hak politik atau personal rights, bukan legal equity rights yang berkaitan dengan persamaan di depan hukum.`},
+{q:`Kewajiban warga negara yang tidak diatur dalam UUD NRI Tahun 1945 Pasal 27, 28, 30 yaitu ….`,opts:[`kewajiban dalam usaha-usaha pertahanan dan keamanan negara`,`menjunjung tinggi hukum dan segala peraturan yang berlaku`,`menghormati hak dan kebebasan orang lain untuk berserikat`,`melestarikan budaya bangsa secara berkelanjutan`],correct:3,exp:`Kewajiban melestarikan budaya tidak secara eksplisit disebut dalam pasal-pasal tersebut, meskipun penting secara konstitusional.`},
+{q:`Piagam perjanjian yang merupakan tonggak sejarah demokrasi dan berisi kesepakatan antara para bangsawan dan Raja John di Inggris bahwa raja beserta keturunannya akan menghormati kemerdekaan, hak, dan kebebasan adalah ….`,opts:[`Perjanjian Versailles`,`Magna Charta`,`Charter United Nation`,`Konvensi Jenewa`],correct:1,exp:`Magna Carta (1215) adalah piagam yang membatasi kekuasaan raja dan melindungi hak-hak bangsawan, dianggap sebagai cikal bakal demokrasi modern.`},
+{q:`Integrasi nasional bagi bangsa Indonesia mutlak diperlukan karena karakteristik masyarakat Indonesia terdiri atas berbagai hal-hal sebagai berikut, kecuali ….`,opts:[`keberagaman etnis`,`kondisi sosial yang berbeda`,`sumber daya alam yang beragam`,`keanekaragaman budaya`],correct:2,exp:`Keragaman sumber daya alam bukan faktor yang secara langsung memerlukan integrasi nasional. Integrasi lebih dibutuhkan untuk mengelola keragaman sosial, budaya, dan etnis.`},
+{q:`Negara berkewajiban untuk melakukan pembangunan seutuhnya dan seluruhnya bagi rakyat Indonesia tanpa terkecuali dan memperhatikan asas nondiskriminatif kepada kelompok-kelompok minor yang ada di Indonesia. Pernyataan tersebut sesuai dengan sila ….`,opts:[`Ketuhanan Yang Maha Esa`,`Keadilan Sosial Bagi Seluruh Rakyat Indonesia`,`Persatuan Indonesia`,`Kemanusiaan Yang Adil dan Beradab`],correct:1,exp:`Keadilan sosial bagi seluruh rakyat Indonesia mencakup pemerataan pembangunan dan perlindungan terhadap kelompok minoritas tanpa diskriminasi.`},
+{q:`Berikut filsuf Yunani Kuno yang merubah fokus kajian filsafat alam menjadi kajian filsafat manusia adalah ….`,opts:[`Socrates`,`Plato`,`Pythagoras`,`Aristoteles`],correct:0,exp:`Socrates dikenal sebagai filsuf yang mengalihkan filsafat dari spekulasi alam ke kajian tentang manusia, etika, dan kehidupan sosial.`},
+{q:`Kewenangan atau kekuasaan yang benar atas sesuatu atau untuk melakukan sesuatu, merupakan pengertian hak secara .…`,opts:[`historis`,`ontologi`,`etimologi`,`aksiologi`],correct:2,exp:`Secara etimologis, "hak" berasal dari bahasa Arab "haqq" yang berarti benar, milik, atau kewenangan.`},
+{q:`Ketentuan tentang Lagu Kebangsaan Indonesia Raya diatur dalam Undang-undang No. 24 Tahun 2009 Pasal ….`,opts:[`4 sampai Pasal 24`,`25 sampai Pasal 45`,`46 sampai Pasal 57`,`58 sampai Pasal 64`],correct:2,exp:`UU No. 24 Tahun 2009 tentang Bendera, Bahasa, dan Lambang Negara, serta Lagu Kebangsaan, mengatur Lagu Kebangsaan pada Pasal 46–57.`},
+{q:`Rumusan integrasi nasional pada masa orde baru dibangun dari membangun rasa persatuan dan kesatuan melalui kegiatan ….`,opts:[`gotong royong`,`kerja bakti`,`Inpres Desa Tertinggal (IDT)`,`Wonderful Indonesia`],correct:2,exp:`Program Inpres Desa Tertinggal (IDT) pada masa Orde Baru bertujuan mengurangi kesenjangan dan memperkuat integrasi nasional melalui pembangunan desa.`},
+{q:`Pancasila sebagai pandangan hidup bangsa Indonesia merupakan perjanjian luhur bangsa Indonesia. Maksud dari pernyataan ini adalah ....`,opts:[`Pancasila tidak boleh diubah karena merupakan dasar negara yang fundamental`,`Pancasila merupakan suatu kesepakatan (konsensus) di antara para pendiri negara yang memiliki makna dan nilai yang luhur`,`Pancasila dapat ditafsirkan ulang dan disesuaikan dengan perkembangan zaman`,`penafsiran atas Pancasila hanya boleh dilakukan oleh MPR sebagai lembaga yang berwenang`],correct:1,exp:`Pancasila disebut perjanjian luhur karena merupakan hasil kesepakatan para pendiri bangsa yang mengandung nilai-nilai luhur untuk dijadikan dasar negara.`},
+{q:`Membangun kesadaran kolektif akan sejarah bangsa telah ditanamkan oleh para pendiri bangsa melalui berbagai cara, salah satunya dengan membuat bangunan fisik seperti berikut, kecuali ….`,opts:[`museum sejarah`,`museum perjuangan`,`Dufan`,`TMII`],correct:2,exp:`Dufan (Dunia Fantasi) adalah taman hiburan, bukan bangunan yang secara khusus dibangun untuk membangun kesadaran sejarah bangsa.`},
+{q:`Yang bukan hakikat manusia menurut konsep demokrasi adalah sebagai mahluk ….`,opts:[`individual`,`kreatif`,`sosial`,`bebas`],correct:1,exp:`Dalam demokrasi, manusia dipandang sebagai makhluk individu, sosial, dan bebas. Kreativitas bukan hakikat khusus dalam konsep demokrasi.`},
+{q:`Berikut yang bukan merupakan karakter bangsa Indonesia yang tercermin dalam Pancasila adalah ….`,opts:[`sifat religius`,`sikap menghormati bangsa dan manusia lain`,`musyawarah`,`ide tentang keadilan sosial bagi golongan yang dominan`],correct:3,exp:`Keadilan sosial dalam Pancasila berlaku bagi seluruh rakyat, bukan hanya golongan dominan.`},
+{q:`Suatu kesatuan solidaritas, kesatuan yang terdiri atas orang-orang yang saling merasa setia kawan dengan satu sama lain disebut ….`,opts:[`kesatuan`,`negara`,`bangsa`,`kebinekaan`],correct:1,exp:`Catatan: kunci jawaban pada bank soal asal menandai "negara", meskipun definisi solidaritas dan rasa setia kawan ini secara konsep lebih dekat dengan pengertian "bangsa" — kemungkinan ada inkonsistensi pada soal aslinya.`},
+{q:`Kebenaran yang dihasilkan dari sebuah ilmu adalah kebenaran yang bersifat universal yang artinya ….`,opts:[`dapat disanggah oleh masyarakat`,`dapat diterima oleh masyarakat dimana saja dan kapan saja`,`terbatas oleh waktu`,`hanya berlaku pada suatu wilayah`],correct:1,exp:`Kebenaran ilmiah bersifat universal, artinya berlaku umum dan dapat diterima di mana pun dan kapan pun.`},
+{q:`Hasan Habib mengartikan wawasan nusantara sebagai kebulatan wilayah nasional yang memiliki kesatuan dalam hal-hal berikut ini, kecuali ….`,opts:[`satu kesatuan bangsa`,`satu tujuan dan tekad perjuangan`,`satu kesatuan dalam menyamakan perbedaan`,`satu kesatuan sosial budaya`],correct:2,exp:`Wawasan Nusantara tidak bermaksud menyamakan perbedaan, tetapi mempersatukan perbedaan dalam kesatuan bangsa dan negara.`},
+{q:`Teori kedaulatan Tuhan menjelaskan bahwa ….`,opts:[`kepala negara adalah wakil Tuhan di dunia`,`kekuasaan tertinggi di tangan Tuhan`,`apa yang terjadi di bumi adalah kehendak Tuhan`,`Tuhan adalah pencipta langit dan bumi`],correct:1,exp:`Teori kedaulatan Tuhan menyatakan bahwa kekuasaan tertinggi (kedaulatan) berasal dari Tuhan, dan pemimpin hanyalah wakil-Nya.`},
+{q:`Ruang lingkup Pendidikan Kewarganegaraan terdiri atas 9 aspek. Berikut ini yang tidak termasuk aspek-aspek tersebut yaitu . . .`,opts:[`wawasan nusantara`,`demokrasi`,`ketahanan nasional`,`enterpreneurship`],correct:3,exp:`Kewirausahaan (enterpreneurship) bukan termasuk dalam 9 aspek Pendidikan Kewarganegaraan, yang meliputi antara lain wawasan nusantara, demokrasi, HAM, dll.`},
+{q:`Pengertian konstitusi dalam arti sempit sama dengan ...`,opts:[`UU`,`UUD`,`hukum`,`konvensi`],correct:1,exp:`Konstitusi dalam arti sempit adalah Undang-Undang Dasar (UUD), sedangkan dalam arti luas mencakup semua hukum dasar.`},
+{q:`Berikut kondisi masyarakat ketika suatu negara berfungsi dengan baik, kecuali ….`,opts:[`kesejahteraan umum merata`,`bencana alam terjadi di mana-mana`,`keamanan dan ketertiban terwujud`,`serangan dari luar dapat diantisipasi`],correct:1,exp:`Bencana alam adalah fenomena alam yang tidak terkait langsung dengan fungsi negara. Negara yang berfungsi baik justru mampu mengelola dan mengurangi dampak bencana.`},
+{q:`Membantu mahasiswa memantapkan kepribadiannya agar secara konsisten mampu mewujudkan nilai-nilai dasar Pancasila, rasa kebangsaan dan cinta tanah air dalam menguasai, menerapkan, dan mengembangkan ilmu pengetahuan, teknologi dan seni dengan rasa tanggung jawab dan bermoral, merupakan …. Pendidikan Kewarganegaraan.`,opts:[`visi`,`moto`,`misi`,`amanat`],correct:0,exp:`Pernyataan tersebut merupakan visi Pendidikan Kewarganegaraan, yaitu gambaran ideal yang ingin dicapai.`},
+{q:`Berikut ini yang merupakan alasan otonomi daerah diterapkan adalah ….`,opts:[`banyaknya korupsi yang terjadi di Indonesia baik di tingkat pusat maupun daerah`,`masyarakat kurang puas dengan kebijakan pemerintah pusat`,`pemerintahan yang tidak terintegrasi dapat membawa pemerataan pembangunan sampai ke wilayah terluar Indonesia`,`pemerintahan yang sentralistik tidak dapat membawa pemerataan pembangunan sampai ke wilayah-wilayah terluar Indonesia`],correct:3,exp:`Otonomi daerah diterapkan karena sentralisasi dianggap tidak mampu mendorong pemerataan pembangunan hingga ke daerah terluar.`},
+{q:`Ada dua istilah asing yang sangat terkait dengan pemerintahan yaitu governance dan government. Perbedaan dari dua istilah itu adalah ….`,opts:[`istilah government memiliki cakupan yang jauh lebih sempit dibandingkan dengan istilah governance`,`istilah government memiliki cakupan yang jauh lebih luas dibandingkan dengan istilah governance`,`istilah government merujuk pada lembaga legislatif, sedangkan governance merujuk pada lembaga eksekutif`,`istilah government berasal dari bahasa yang berbeda dengan governance`],correct:0,exp:`Governance mencakup seluruh proses dan aktor dalam pengelolaan negara (termasuk non-pemerintah), sementara government hanya merujuk pada lembaga pemerintahan formal.`},
+{q:`Menurut Undang-Undang No 20 tahun 2003 disebutkan bahwa Pendidikan Kewarganegaraan dimaksudkan untuk membentuk peserta didik menjadi manusia yang memiliki ....`,opts:[`rasa bersyukur dan berjuang`,`rasa kebangsaan dan cinta tanah air`,`rasa kebangsaan dan kenegaraan`,`rasa bersyukur dan toleransi`],correct:1,exp:`UU No. 20 Tahun 2003 tentang Sisdiknas menyebutkan bahwa Pendidikan Kewarganegaraan bertujuan membentuk peserta didik memiliki rasa kebangsaan dan cinta tanah air.`},
+{q:`Yang termasuk di dalam azas umum otonomi daerah adalah ….`,opts:[`kejujuran`,`keadilan`,`keterbukaan`,`dekonsentralisasi`],correct:3,exp:`Asas umum penyelenggaraan pemerintahan daerah meliputi desentralisasi, dekonsentrasi, dan tugas pembantuan. Dekonsentrasi adalah salah satunya.`},
+{q:`Pendidikan Kewarganegaraan memiliki kompetensi dasar dan wajib bagi mahasiswa. Berikut ini yang termasuk kompetensi wajibnya, kecuali….`,opts:[`normatif`,`etis`,`estetis`,`dinamis`],correct:2,exp:`Kompetensi wajib Pendidikan Kewarganegaraan meliputi normatif, etis, dan dinamis. Estetis (keindahan) tidak termasuk.`},
+{q:`Eksistensi dan urgensi Pendidikan Kewarganegaraan menjadi wahana pendidikan nilai, moral, dan pendidikan budi pekerti, sehingga dapat menjadi sarana transformasi pendidikan karakter untuk menumbuhkembangkan rasa nasionalisme, kesadaran berbangsa dan bernegara. Hal ini merupakan pengertian Pendidikan Kewarganegaraan secara filsafat dilihat dari perspektif ….`,opts:[`epistimologi`,`ontologi`,`metodologi`,`aksiologi`],correct:3,exp:`Aksiologi membahas nilai dan manfaat suatu ilmu. Pernyataan tersebut menekankan nilai dan moral dalam Pendidikan Kewarganegaraan.`},
+{q:`Salah satu kriteria dalam tata kelola pemerintahan yang baik adalah partisipasi, artinya …`,opts:[`tata kelola pemerintahan yang baik juga ditentukan oleh seberapa cepat pemerintah merespon berbagai persoalan yang muncul di masyarakat`,`rakyat memiliki suara dalam pengambilan keputusan baik secara langsung maupun tidak langsung`,`tata kelola yang baik harus mampu menjamin transparansi di hampir semua bidang yang terkait dengan pengelolaan informasi`,`negara adalah entitas kolektif yang terdiri atas berbagai macam golongan dan kepentingan`],correct:1,exp:`Partisipasi dalam good governance berarti masyarakat terlibat dalam pengambilan keputusan publik.`},
+{q:`Tujuan dari konstitusi adalah untuk ….`,opts:[`menciptakan kesatuan dalam beberapa`,`membatasi kekuasaan dari penguasa dan mengatur jalannya penyelenggaraan negara`,`memperkuat pertahanan dan keamanan negara`,`melindungi kebudayaan nasional`],correct:1,exp:`Tujuan utama konstitusi adalah membatasi kekuasaan pemerintah dan mengatur penyelenggaraan negara agar berjalan sesuai hukum.`}
+];
+
+// ---------------- app state ----------------
+let order = QUESTIONS.map((_,i)=>i);
+let cur = 0;
+let answers = new Array(QUESTIONS.length).fill(null); // selected option index per original question id, or null
+
+const qtext = document.getElementById('qtext');
+const optsEl = document.getElementById('opts');
+const qnumLabel = document.getElementById('qnumLabel');
+const curNum = document.getElementById('curNum');
+const totalNum = document.getElementById('totalNum');
+const scoreNum = document.getElementById('scoreNum');
+const answeredNum = document.getElementById('answeredNum');
+const trackFill = document.getElementById('trackFill');
+const explainEl = document.getElementById('explain');
+const stampEl = document.getElementById('stamp');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const quizView = document.getElementById('quizView');
+const summaryView = document.getElementById('summaryView');
+
+totalNum.textContent = QUESTIONS.length;
+
+function render(){
+  const qid = order[cur];
+  const q = QUESTIONS[qid];
+  qnumLabel.textContent = `Soal No. ${cur+1}`;
+  qtext.textContent = q.q;
+  curNum.textContent = cur+1;
+
+  const answered = answers[qid];
+  optsEl.innerHTML = '';
+  optsEl.className = 'opts' + (answered!==null ? ' locked' : '');
+  const letters = ['A','B','C','D'];
+
+  q.opts.forEach((optText, idx)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = `<span class="letter">${letters[idx]}</span><span>${optText}</span>`;
+    if(answered!==null){
+      if(idx === q.correct) b.classList.add('correct');
+      else if(idx === answered) b.classList.add('wrong');
+      else b.classList.add('dim');
+    }
+    b.addEventListener('click', ()=>selectAnswer(qid, idx));
+    optsEl.appendChild(b);
+  });
+
+  stampEl.classList.remove('show','wrong');
+  explainEl.classList.remove('show');
+  explainEl.innerHTML = '';
+
+  if(answered!==null){
+    showFeedback(qid, answered, false);
+  }
+
+  prevBtn.disabled = cur===0;
+  nextBtn.textContent = cur === order.length-1 ? 'Lihat Hasil ✓' : 'Selanjutnya ›';
+
+  trackFill.style.width = ((cur+1)/order.length*100) + '%';
+  updateStatus();
+}
+
+function updateStatus(){
+  let answeredCount = 0, correctCount = 0;
+  answers.forEach((a,i)=>{
+    if(a!==null){
+      answeredCount++;
+      if(a === QUESTIONS[i].correct) correctCount++;
+    }
+  });
+  answeredNum.textContent = answeredCount;
+  scoreNum.textContent = correctCount;
+}
+
+function selectAnswer(qid, idx){
+  if(answers[qid]!==null) return; // already locked
+  answers[qid] = idx;
+  render();
+  updateStatus();
+}
+
+function showFeedback(qid, chosenIdx, animate){
+  const q = QUESTIONS[qid];
+  const isCorrect = chosenIdx === q.correct;
+  stampEl.textContent = isCorrect ? 'BENAR' : 'SALAH';
+  stampEl.classList.toggle('wrong', !isCorrect);
+  requestAnimationFrame(()=> stampEl.classList.add('show'));
+  explainEl.innerHTML = `<b>Penjelasan:</b> ${q.exp}`;
+  requestAnimationFrame(()=> explainEl.classList.add('show'));
+}
+
+prevBtn.addEventListener('click', ()=>{
+  if(cur>0){ cur--; render(); }
+});
+nextBtn.addEventListener('click', ()=>{
+  if(cur < order.length-1){ cur++; render(); }
+  else { showSummary(); }
+});
+
+document.getElementById('jumpBtn').addEventListener('click', ()=>{
+  const v = parseInt(document.getElementById('jumpInput').value,10);
+  if(v>=1 && v<=order.length){ cur = v-1; render(); }
+});
+document.getElementById('jumpInput').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter') document.getElementById('jumpBtn').click();
+});
+
+document.getElementById('shuffleBtn').addEventListener('click', ()=>{
+  for(let i=order.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [order[i],order[j]] = [order[j],order[i]];
+  }
+  answers = new Array(QUESTIONS.length).fill(null);
+  cur = 0;
+  summaryView.classList.add('hidden');
+  quizView.classList.remove('hidden');
+  render();
+});
+
+function showSummary(){
+  quizView.classList.add('hidden');
+  summaryView.classList.remove('hidden');
+  let correctCount = 0;
+  const wrongIds = [];
+  answers.forEach((a,i)=>{
+    if(a!==null){
+      if(a===QUESTIONS[i].correct) correctCount++;
+      else wrongIds.push(i);
+    }
+  });
+  const answeredCount = answers.filter(a=>a!==null).length;
+  document.getElementById('finalScore').textContent = `${correctCount} / ${answeredCount || QUESTIONS.length}`;
+  const pct = answeredCount ? Math.round(correctCount/answeredCount*100) : 0;
+  const unanswered = QUESTIONS.length - answeredCount;
+  document.getElementById('finalPct').textContent = unanswered>0
+    ? `${pct}% benar dari ${answeredCount} soal yang dijawab. ${unanswered} soal belum dijawab.`
+    : `${pct}% benar dari seluruh ${QUESTIONS.length} soal.`;
+
+  const chipWrap = document.getElementById('chipWrap');
+  const reviewLabel = document.getElementById('reviewLabel');
+  chipWrap.innerHTML = '';
+  if(wrongIds.length){
+    reviewLabel.classList.remove('hidden');
+    wrongIds.sort((a,b)=>a-b).forEach(id=>{
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = `No. ${id+1}`;
+      chip.addEventListener('click', ()=>{
+        const posInOrder = order.indexOf(id);
+        cur = posInOrder;
+        summaryView.classList.add('hidden');
+        quizView.classList.remove('hidden');
+        render();
+      });
+      chipWrap.appendChild(chip);
+    });
+  } else {
+    reviewLabel.classList.add('hidden');
+  }
+}
+
+document.getElementById('reviewWrongBtn').addEventListener('click', ()=>{
+  const wrongIds = [];
+  answers.forEach((a,i)=>{ if(a!==null && a!==QUESTIONS[i].correct) wrongIds.push(i); });
+  if(!wrongIds.length){ alert('Belum ada soal yang salah — kerja bagus!'); return; }
+  order = wrongIds;
+  cur = 0;
+  summaryView.classList.add('hidden');
+  quizView.classList.remove('hidden');
+  render();
+});
+
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  order = QUESTIONS.map((_,i)=>i);
+  answers = new Array(QUESTIONS.length).fill(null);
+  cur = 0;
+  summaryView.classList.add('hidden');
+  quizView.classList.remove('hidden');
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
